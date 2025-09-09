@@ -6,6 +6,9 @@ class Movie {
   final String genre;
   final String synopsis;
   bool isFavorite;
+  final double? rating;
+  final String? duration;
+  final String? ageRating;
 
   Movie({
     required this.id,
@@ -15,6 +18,9 @@ class Movie {
     required this.genre,
     required this.synopsis,
     this.isFavorite = false,
+    this.rating,
+    this.duration,
+    this.ageRating,
   });
 
   // CopyWith method for immutable updates
@@ -26,6 +32,9 @@ class Movie {
     String? genre,
     String? synopsis,
     bool? isFavorite,
+    double? rating,
+    String? duration,
+    String? ageRating,
   }) {
     return Movie(
       id: id ?? this.id,
@@ -35,6 +44,9 @@ class Movie {
       genre: genre ?? this.genre,
       synopsis: synopsis ?? this.synopsis,
       isFavorite: isFavorite ?? this.isFavorite,
+      rating: rating ?? this.rating,
+      duration: duration ?? this.duration,
+      ageRating: ageRating ?? this.ageRating,
     );
   }
 
@@ -49,7 +61,10 @@ class Movie {
           poster == other.poster &&
           genre == other.genre &&
           synopsis == other.synopsis &&
-          isFavorite == other.isFavorite;
+          isFavorite == other.isFavorite &&
+          rating == other.rating &&
+          duration == other.duration &&
+          ageRating == other.ageRating;
 
   @override
   int get hashCode =>
@@ -59,5 +74,8 @@ class Movie {
       poster.hashCode ^
       genre.hashCode ^
       synopsis.hashCode ^
-      isFavorite.hashCode;
+      isFavorite.hashCode ^
+      rating.hashCode ^
+      duration.hashCode ^
+      ageRating.hashCode;
 }
