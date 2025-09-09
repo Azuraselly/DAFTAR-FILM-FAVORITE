@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/movie.dart';
 import '../component/movie_card.dart';
+import 'favorite_screen.dart';
 import 'movie_detail.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -97,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _filteredMovies = List.from(_movies);
     _genres = [
       'Semua Genre',
-      ..._allMovies.expand((movie) => movie.genre.split(', ')).toSet().toList()
+      ..._allMovies.expand((movie) => movie.genre.split(', ')).toSet().toList(),
     ];
   }
 
@@ -137,11 +138,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _updateFilteredMovies() {
     _filteredMovies = _movies.where((movie) {
-      final matchesSearch = _searchQuery.isEmpty ||
+      final matchesSearch =
+          _searchQuery.isEmpty ||
           movie.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           movie.genre.toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesGenre =
-          _selectedGenre == 'Semua Genre' || movie.genre.contains(_selectedGenre);
+          _selectedGenre == 'Semua Genre' ||
+          movie.genre.contains(_selectedGenre);
       return matchesSearch && matchesGenre;
     }).toList();
   }
@@ -174,8 +177,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   : null,
               filled: true,
               fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
@@ -203,7 +208,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     selectedColor: const Color(0xFFD2691E),
                     backgroundColor: Colors.white,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFFD2691E),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFFD2691E),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -251,47 +258,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ===================== LIST FILM =====================
-  Widget _buildMovieList(List<Movie> movieList, {bool isFavoriteTab = false}) {
-    if (movieList.isEmpty) {
-      return const Center(
-        child: Text(
-          'Tidak ada film tersedia',
-          style: TextStyle(fontSize: 16, color: Colors.brown),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: movieList.length,
-      itemBuilder: (context, index) {
-        final movie = movieList[index];
-        return MovieCard(
-          movie: movie,
-          isFavorite: movie.isFavorite,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MovieDetailScreen(
-                  movie: movie,
-                  onFavorite: () => _toggleFavorite(movie),
-                ),
-              ),
-            );
-          },
-          onFavorite: () => _toggleFavorite(movie),
-        );
-      },
-    );
-  }
-
   // ===================== BUILD =====================
   @override
   Widget build(BuildContext context) {
-    final currentMovies =
-        _selectedIndex == 0 ? _filteredMovies : _favoriteMovies;
+    final currentMovies = _selectedIndex == 0
+        ? _filteredMovies
+        : _favoriteMovies;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -308,8 +280,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Header
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -349,8 +323,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           _buildCarousel(),
                           const Padding(
-                            padding:
-                                EdgeInsets.only(left: 16, top: 12, bottom: 8),
+                            padding: EdgeInsets.only(
+                              left: 16,
+                              top: 12,
+                              bottom: 8,
+                            ),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -363,10 +340,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          Expanded(child: _buildMovieList(currentMovies)),
                         ],
                       )
-                    : _buildMovieList(currentMovies, isFavoriteTab: true),
+                    : FavoriteScreen(
+                        favoriteMovies: _favoriteMovies,
+                        onFavoriteToggle: _toggleFavorite,
+                      ),
               ),
             ],
           ),

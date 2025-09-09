@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/movie.dart';
+import 'dart:ui';
 
-class MovieDetailScreen extends StatelessWidget {
+class MovieDetailScreen extends StatefulWidget {
   final Movie movie;
   final VoidCallback onFavorite;
 
@@ -12,360 +13,249 @@ class MovieDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<MovieDetailScreen> createState() => _MovieDetailScreenState();
+}
+
+class _MovieDetailScreenState extends State<MovieDetailScreen> {
+  late bool isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = widget.movie.isFavorite;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
+      backgroundColor: const Color(0xFFFFF3E0),
       body: Stack(
         children: [
-          // Latar belakang dengan gradasi warna hangat
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFF9ECE0),
-                  Color(0xFFE8D7B8),
-                ],
-                stops: [0.0, 1.0],
+          // ===== Background poster =====
+          Hero(
+            tag: 'movie_poster_${widget.movie.id}',
+            child: Container(
+              height: screenHeight * 0.5,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(widget.movie.poster),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withOpacity(0.1),
+                      Colors.black.withOpacity(0.7),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
+                ),
               ),
             ),
           ),
 
-          // Konten yang dapat discroll
-          CustomScrollView(
-            slivers: [
-              // AppBar dengan gambar poster film
-              SliverAppBar(
-                expandedHeight: 520,
-                floating: false,
-                pinned: true,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 24),
-                    color: const Color(0xFFD4A017),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  titlePadding:
-                      const EdgeInsets.only(bottom: 28, left: 16, right: 16),
-                  title: AnimatedOpacity(
-                    opacity: 1.0,
-                    duration: const Duration(milliseconds: 500),
-                    child: Text(
-                      movie.title,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 30,
-                        letterSpacing: 1.2,
-                        shadows: [
-                          Shadow(
-                            offset: const Offset(2, 2),
-                            blurRadius: 12,
-                            color: Colors.black.withOpacity(0.8),
+          // ===== Konten scrollable =====
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: screenHeight * 0.42), // spasi di bawah poster
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(22),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(
+                            color: Colors.brown.withOpacity(0.1),
                           ),
-                        ],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  background: Hero(
-                    tag: 'movie_poster_${movie.id}',
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Poster film
-                        Image.asset(
-                          movie.poster,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.grey[600]!,
-                                  Colors.grey[800]!,
-                                ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.brown.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ShaderMask(
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [Color(0xFFD2691E), Color(0xFF6D4C41)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ).createShader(bounds),
+                              child: Text(
+                                widget.movie.title,
+                                style: const TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                            child: const Icon(
-                              Icons.movie_filter_rounded,
-                              size: 160,
-                              color: Color(0xFFD4A017),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                for (int i = 1; i <= 5; i++)
+                                  Icon(
+                                    i <= (widget.movie.rating ?? 3)
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: const Color(0xFFD2691E),
+                                    size: 20,
+                                  ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "${widget.movie.rating ?? 3}/5.0",
+                                  style: const TextStyle(
+                                    color: Color(0xFFD2691E),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 14),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: [
+                                _buildChip(widget.movie.year),
+                                _buildChip(widget.movie.genre),
+                                _buildChip(widget.movie.duration ?? '120 min'),
+                                _buildChip(widget.movie.ageRating ?? 'PG-13'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(36),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.brown.withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, -3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Sinopsis",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF6D4C41),
                           ),
                         ),
-                        // Lapisan gelap agar teks lebih mudah dibaca
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.05),
-                                Colors.black.withOpacity(0.85),
-                              ],
-                              stops: const [0.0, 0.9],
-                            ),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.movie.synopsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.brown,
+                            height: 1.5,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                iconTheme: const IconThemeData(color: Color(0xFFD4A017)),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: AnimatedFavoriteButton(
-                      onFavorite: onFavorite,
-                      isFavorited: movie.isFavorite,
-                    ),
-                  ),
-                ],
+                const SizedBox(height: 80),
+              ],
+            ),
+          ),
+
+          // ===== Tombol Favorite =====
+          Positioned(
+            bottom: 30,
+            right: 24,
+            child: FloatingActionButton(
+              backgroundColor: isFavorite
+                  ? Colors.pinkAccent
+                  : const Color(0xFFD2691E),
+              child: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: Colors.white,
               ),
+              onPressed: () {
+                setState(() {
+                  isFavorite = !isFavorite;
+                });
+                widget.onFavorite(); // update status di home
+              },
+              elevation: 8,
+            ),
+          ),
 
-              // Bagian konten detail film
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Judul dengan efek gradasi emas
-                      ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [
-                            const Color(0xFFD4A017),
-                            const Color(0xFF8B5E3C),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ).createShader(bounds),
-                        child: Text(
-                          movie.title,
-                          style: const TextStyle(
-                            fontSize: 38,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 1.3,
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Rating bintang
-                      Row(
-                        children: [
-                          for (int i = 1; i <= 5; i++)
-                            Icon(
-                              i <= (movie.rating ?? 3)
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              color: const Color(0xFFD4A017),
-                              size: 24,
-                            ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${movie.rating ?? 3.0}/5.0',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFFD4A017),
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Informasi tambahan (tahun, genre, durasi, rating usia)
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          _buildChip(movie.year),
-                          _buildChip(movie.genre),
-                          _buildChip(movie.duration ?? '120 min'),
-                          _buildChip(movie.ageRating ?? 'PG-13'),
-                        ],
-                      ),
-                      const SizedBox(height: 36),
-
-                      // Bagian sinopsis film
-                      Text(
-                        'Sinopsis',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black.withOpacity(0.9),
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        movie.synopsis,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black.withOpacity(0.85),
-                          height: 1.7,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      const SizedBox(height: 80),
-                    ],
-                  ),
-                ),
+          // Tombol Back
+          Positioned(
+            top: 40,
+            left: 16,
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.6),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Widget chip dekoratif untuk informasi tambahan
   Widget _buildChip(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFFD4A017).withOpacity(0.6),
-          width: 2,
-        ),
+        color: Colors.white.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD2691E).withOpacity(0.6)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.brown.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 16,
-          color: Color(0xFFD4A017),
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-        ),
-      ),
-    );
-  }
-}
-
-// ===================== Animated Favorite Button =====================
-class AnimatedFavoriteButton extends StatefulWidget {
-  final VoidCallback onFavorite;
-  final bool isFavorited;
-
-  const AnimatedFavoriteButton({
-    super.key,
-    required this.onFavorite,
-    required this.isFavorited,
-  });
-
-  @override
-  State<AnimatedFavoriteButton> createState() => _AnimatedFavoriteButtonState();
-}
-
-class _AnimatedFavoriteButtonState extends State<AnimatedFavoriteButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late bool _isFavorited;
-
-  @override
-  void initState() {
-    super.initState();
-    _isFavorited = widget.isFavorited;
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant AnimatedFavoriteButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isFavorited != widget.isFavorited) {
-      _isFavorited = widget.isFavorited;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _toggleFavorite() {
-    setState(() {
-      _isFavorited = !_isFavorited;
-      if (_isFavorited) {
-        _controller.forward().then((_) => _controller.reverse());
-      }
-      widget.onFavorite();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: InkWell(
-        onTap: _toggleFavorite,
-        borderRadius: BorderRadius.circular(50),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFD4A017).withOpacity(0.9),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            transitionBuilder: (child, animation) => ScaleTransition(
-              scale: animation,
-              child: child,
-            ),
-            child: Icon(
-              _isFavorited ? Icons.favorite : Icons.favorite_border,
-              key: ValueKey<bool>(_isFavorited),
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
+          color: Color(0xFFD2691E),
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
